@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 from torch.utils.data import DataLoader
 
-from src.config import MANIFESTS_DIR, SPLITS_DIR, RUNS_DIR, REPORTS_DIR
+from src.config import DATA_DIR, MANIFESTS_DIR, SPLITS_DIR, RUNS_DIR, REPORTS_DIR
 from src.data.dataset import PlantarFootDataset
 from src.data.split import load_patient_splits
 from src.train import instantiate_model, evaluate_model
@@ -22,6 +22,7 @@ from src.evaluation.interpretability import GradCAM
 def run_evaluation(
     manifest_path: Path = MANIFESTS_DIR / "dataset.csv",
     checkpoint_path: Path = None,
+    splits_path: Path = None,
     model_name: str = "resnet18",
     modality: str = "IR",
     task: str = "binary",
@@ -29,10 +30,29 @@ def run_evaluation(
     generate_gradcam: bool = True,
 ):
     df = pd.read_csv(manifest_path)
-    splits = load_patient_splits(SPLITS_DIR / "patient_splits.json")
+    
+    # Auto-detect real patient splits vs synthetic splits
+    if splits_path is None:
+        real_splits = DATA_DIR / "splits_real" / "patient_splits.json"
+        default_splits = SPLITS_DIR / "patient_splits.json"
+        if "real" in str(manifest_path).lower() and real_splits.exists():
+            splits_path = real_splits
+        elif real_splits.exists():
+            splits_path = real_splits
+        else:
+            splits_path = default_splits
+
+    splits = load_patient_splits(Path(splits_path))
     test_patients = set(splits["test_patients"])
     test_df = df[df["patient_id"].isin(test_patients)].reset_index(drop=True)
 
+    if len(test_df) == 0:
+        raise ValueError(
+            f"Zero matching test patients found in {manifest_path} using split file {splits_path}.\n"
+            f"Dataset patients: {df['patient_id'].iloc[:3].tolist()}... vs Split patients: {list(test_patients)[:3]}..."
+        )
+
+    print(f"Evaluating {len(test_df)} held-out test scans ({len(test_patients)} patients) from {manifest_path.name}")
     num_classes = 2 if task == "binary" else 4
     is_multimodal = modality.upper() in ["RGB-IR", "MULTIMODAL"]
 
@@ -70,6 +90,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate foot classification model")
     parser.add_argument("--manifest", type=str, default=str(MANIFESTS_DIR / "dataset.csv"))
     parser.add_argument("--checkpoint", type=str, default=None)
+    parser.add_argument("--splits", type=str, default=None)
     parser.add_argument("--model", type=str, default="resnet18")
     parser.add_argument("--modality", type=str, default="IR", choices=["RGB", "IR", "SHAPE", "RGB-IR"])
     parser.add_argument("--task", type=str, default="binary", choices=["binary", "multiclass"])
@@ -78,6 +99,7 @@ if __name__ == "__main__":
     run_evaluation(
         manifest_path=Path(args.manifest),
         checkpoint_path=Path(args.checkpoint) if args.checkpoint else None,
+        splits_path=Path(args.splits) if args.splits else None,
         model_name=args.model,
         modality=args.modality,
         task=args.task,

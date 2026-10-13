@@ -3,8 +3,10 @@ Paper: Muscillo et al. (Discover Artificial Intelligence, 2026) 6:1415
 """
 
 import os
+import sys
 import shutil
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 import numpy as np
 import pandas as pd
 from PIL import Image
