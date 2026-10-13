@@ -1,0 +1,29 @@
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Checkpoints and models (large binaries > 50MB)
+runs/
+*.pt
+*.pth
+*.onnx
+
+# Datasets and raw images (local files)
+data/raw/
+data/processed/
+data/manifests/
+data/splits_real/
+data/splits/
+*.png.backup
+
+# Logs and system
+*.log
+.system_generated/
+.DS_Store
+Thumbs.db
