@@ -1,0 +1,48 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Show All Graphs (Curves & Confusion Matrices)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plot_graphs.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Show Training Accuracy & Loss Curves",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plot_graphs.py",
+            "args": ["--type", "curves"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Show Confusion Matrices",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plot_graphs.py",
+            "args": ["--type", "confusion"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Run Clinical Predictor (Grad-CAM)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/predict.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Check Model Accuracy Table",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/check_accuracy.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
+

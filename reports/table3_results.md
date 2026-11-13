@@ -1,4 +1,4 @@
-# Table 3 Replication: Machine Learning Models and Data Types
+﻿# Table 3 Replication: Machine Learning Models and Data Types
 
 | Model         | Data / Image   |   Classes | Bal. Accuracy   | Precision     | Recall        | F1-Score      |
 |:--------------|:---------------|----------:|:----------------|:--------------|:--------------|:--------------|

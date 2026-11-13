@@ -30,7 +30,6 @@ def compute_classification_metrics(
         rec = float(recall_score(y_true, y_pred, average="binary", zero_division=0))
         f1 = float(f1_score(y_true, y_pred, average="binary", zero_division=0))
     else:
-        # Multi-class macro average (Formulae 4-7)
         prec = float(precision_score(y_true, y_pred, average="macro", zero_division=0))
         rec = float(recall_score(y_true, y_pred, average="macro", zero_division=0))
         f1 = float(f1_score(y_true, y_pred, average="macro", zero_division=0))
@@ -45,7 +44,6 @@ def compute_classification_metrics(
     if y_prob is not None:
         try:
             if num_classes == 2:
-                # Binary AUC
                 prob_pos = y_prob[:, 1] if y_prob.ndim == 2 else y_prob
                 metrics["auc_roc"] = float(roc_auc_score(y_true, prob_pos))
             else:
@@ -57,7 +55,7 @@ def compute_classification_metrics(
 
 
 def aggregate_fold_metrics(metrics_list: list[dict[str, float]]) -> dict[str, dict[str, float]]:
-    """Compute mean ± standard deviation across cross-validation evaluation runs (as reported in Tables 3-8)."""
+    """Compute mean +/- standard deviation across cross-validation evaluation runs (as reported in Tables 3-8)."""
     keys = metrics_list[0].keys()
     aggregated = {}
     for k in keys:
@@ -67,3 +65,4 @@ def aggregate_fold_metrics(metrics_list: list[dict[str, float]]) -> dict[str, di
             "std": float(np.std(vals)),
         }
     return aggregated
+

@@ -24,6 +24,9 @@ data/splits/
 
 # Logs and system
 *.log
+!logs/*.log
+.mpl_cache/
+.pytest_cache/
 .system_generated/
 .DS_Store
 Thumbs.db

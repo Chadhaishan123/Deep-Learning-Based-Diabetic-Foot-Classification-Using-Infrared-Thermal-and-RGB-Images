@@ -28,7 +28,7 @@ DEFAULT_STANDUP_SRC = Path(r"C:\Users\ishan\Downloads\STANDUP_Database\STANDUP_D
 
 
 def ingest_real_standup(
-    source_dir: Path = DEFAULT_STANDUP_SRC,
+    source_dir: Path = None,
     output_raw_dir: Path = RAW_DATA_DIR / "standup",
     manifest_path: Path = MANIFESTS_DIR / "standup_real.csv",
 ) -> pd.DataFrame:
@@ -39,9 +39,27 @@ def ingest_real_standup(
     - 84 Diabetic R2 pairs (RGB and thermal)
     Generates segmentation foot masks and constructs unified manifest.
     """
-    source_dir = Path(source_dir)
-    if not source_dir.exists():
-        raise FileNotFoundError(f"STANDUP source directory not found: {source_dir}")
+    candidates = [
+        output_raw_dir,
+        Path(source_dir) if source_dir else None,
+        DEFAULT_STANDUP_SRC,
+        Path(r"C:\Users\ishan\Downloads\STANDUP_Database"),
+    ]
+    resolved_src = None
+    for cand in candidates:
+        if cand is not None:
+            try:
+                if cand.exists() and (cand / "healthy" / "RGB").exists():
+                    resolved_src = cand
+                    break
+            except (PermissionError, OSError):
+                continue
+
+    if resolved_src is None:
+        raise FileNotFoundError(
+            f"STANDUP source directory not found. Looked in:\n" + "\n".join(f" - {c}" for c in candidates if c)
+        )
+    source_dir = resolved_src
 
     output_raw_dir.mkdir(parents=True, exist_ok=True)
     mask_dir = output_raw_dir / "masks"
@@ -78,13 +96,13 @@ def ingest_real_standup(
             stem = rgb_file.stem
             patient_id = f"{stage_name}_{stem}"
 
-            # Copy to workspace raw directory
+            # Copy to workspace raw directory if not already there
             dest_rgb = target_cat_dir / "RGB" / rgb_file.name
             dest_th = target_cat_dir / "thermal" / th_file.name
             
-            if not dest_rgb.exists():
+            if rgb_file.resolve() != dest_rgb.resolve() and not dest_rgb.exists():
                 shutil.copy2(rgb_file, dest_rgb)
-            if not dest_th.exists():
+            if th_file.resolve() != dest_th.resolve() and not dest_th.exists():
                 shutil.copy2(th_file, dest_th)
 
             # Generate segmentation mask

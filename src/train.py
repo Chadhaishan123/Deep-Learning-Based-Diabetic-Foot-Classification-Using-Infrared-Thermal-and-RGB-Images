@@ -19,13 +19,15 @@ from src.config import (
     MANIFESTS_DIR,
     SPLITS_DIR,
     RUNS_DIR,
+    LOGS_DIR,
     RANDOM_SEED,
 )
 from src.data.dataset import PlantarFootDataset
 from src.data.split import create_patient_level_splits, load_patient_splits
 from src.models.resnet import get_resnet_model
 from src.models.lsnet import get_lsnet_model
-from src.models.fusion_models import DE_ResNet, LF_ResNet
+from src.models.fusion_models import DE_ResNet, LF_ResNet, CMA_ResNet
+from src.models.losses import OrdinalFocalLoss
 from src.models.tabular_models import get_tabular_model
 from src.evaluation.metrics import compute_classification_metrics, aggregate_fold_metrics
 
@@ -55,30 +57,33 @@ def instantiate_model(
     modality: str,
     num_classes: int = 2,
     dropout: float = 0.3,
+    pretrained: bool = False,
 ) -> nn.Module:
     """Instantiate appropriate neural network based on model and modality."""
     m_name = model_name.lower()
     mod = modality.upper()
 
     if mod in ["RGB-IR", "MULTIMODAL"]:
-        if "de" in m_name or "double" in m_name:
-            return DE_ResNet(backbone="resnet18", num_classes=num_classes, dropout=dropout)
+        if "cma" in m_name or "attn" in m_name or "gated" in m_name:
+            return CMA_ResNet(backbone="resnet18", num_classes=num_classes, pretrained=pretrained, dropout=dropout)
+        elif "de" in m_name or "double" in m_name:
+            return DE_ResNet(backbone="resnet18", num_classes=num_classes, pretrained=pretrained, dropout=dropout)
         else:
-            return LF_ResNet(backbone="resnet18", num_classes=num_classes, dropout=dropout)
+            return LF_ResNet(backbone="resnet18", num_classes=num_classes, pretrained=pretrained, dropout=dropout)
             
     if "resnet18" in m_name:
-        return get_resnet_model("resnet18", num_classes=num_classes, dropout=dropout)
+        return get_resnet_model("resnet18", num_classes=num_classes, pretrained=pretrained, dropout=dropout)
     elif "resnet50" in m_name:
-        return get_resnet_model("resnet50", num_classes=num_classes, dropout=dropout)
+        return get_resnet_model("resnet50", num_classes=num_classes, pretrained=pretrained, dropout=dropout)
     elif "lsnet-t" in m_name or "lsnet_t" in m_name:
-        return get_lsnet_model("lsnet-t", num_classes=num_classes, dropout=dropout)
+        return get_lsnet_model("lsnet-t", num_classes=num_classes, pretrained=pretrained, dropout=dropout)
     elif "lsnet-s" in m_name or "lsnet_s" in m_name:
-        return get_lsnet_model("lsnet-s", num_classes=num_classes, dropout=dropout)
+        return get_lsnet_model("lsnet-s", num_classes=num_classes, pretrained=pretrained, dropout=dropout)
     elif "lsnet-b" in m_name or "lsnet_b" in m_name:
-        return get_lsnet_model("lsnet-b", num_classes=num_classes, dropout=dropout)
+        return get_lsnet_model("lsnet-b", num_classes=num_classes, pretrained=pretrained, dropout=dropout)
     else:
         # Default fallback
-        return get_resnet_model("resnet18", num_classes=num_classes, dropout=dropout)
+        return get_resnet_model("resnet18", num_classes=num_classes, pretrained=pretrained, dropout=dropout)
 
 
 def train_epoch(model, loader, criterion, optimizer, device, is_multimodal=False):
@@ -169,30 +174,54 @@ def train_single_fold(
         test_metrics, test_probs = evaluate_model(model, test_loader, device, num_classes, is_multimodal)
         return test_metrics, test_probs
 
-    # Inverse-frequency class weights
+    # Inverse-frequency class weights & Clinically-Aware Ordinal Focal Loss for CMA-ResNet / Multiclass
     target_col = "label" if task == "binary" else "multiclass_label"
     train_labels = train_df[target_col].values.astype(int) if target_col in train_df.columns else np.array([train_ds[i]["label"].item() for i in range(len(train_ds))])
     class_weights = compute_inverse_freq_weights(np.array(train_labels), num_classes).to(device)
-    criterion = nn.CrossEntropyLoss(weight=class_weights)
+    if "cma" in model_name.lower() or "ordinal" in model_name.lower():
+        criterion = OrdinalFocalLoss(num_classes=num_classes, gamma=2.0, ordinal_alpha=1.5, class_weights=class_weights).to(device)
+    else:
+        criterion = nn.CrossEntropyLoss(weight=class_weights)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
     best_val_bal_acc = -1.0
+    log_file_path = LOGS_DIR / f"train_{model_name}_{modality}_{task}.log"
+    log_lines = [
+        f"Training run: {model_name} | Modality: {modality} | Task: {task} | Fold: {fold_idx}",
+        f"Epochs: {epochs} | LR: {lr} | Weight Decay: 0.01 | Device: {device}",
+        "-" * 80
+    ]
 
     for epoch in range(epochs):
+        current_lr = optimizer.param_groups[0]["lr"]
         train_loss = train_epoch(model, train_loader, criterion, optimizer, device, is_multimodal)
         val_metrics, _ = evaluate_model(model, val_loader, device, num_classes, is_multimodal)
         scheduler.step()
 
+        saved_msg = ""
         if val_metrics["balanced_accuracy"] > best_val_bal_acc:
             best_val_bal_acc = val_metrics["balanced_accuracy"]
             torch.save(model.state_dict(), best_weights_path)
+            saved_msg = " --> Checkpoint saved"
+
+        log_str = (
+            f"[Epoch {epoch+1:02d}/{epochs:02d}] LR: {current_lr:.2e} | "
+            f"Train Loss: {train_loss:.4f} | Val Loss: {val_metrics.get('loss', 0.0):.4f} | "
+            f"Val BalAcc: {val_metrics['balanced_accuracy']*100:.2f}%{saved_msg}"
+        )
+        log_lines.append(log_str)
 
     # Evaluate best model on the fixed patient-level held-out test set
     if best_weights_path.exists():
         model.load_state_dict(torch.load(best_weights_path, map_location=device))
     test_metrics, test_probs = evaluate_model(model, test_loader, device, num_classes, is_multimodal)
+
+    log_lines.append("-" * 80)
+    log_lines.append(f"Held-out Test Evaluation: BalAcc: {test_metrics['balanced_accuracy']:.4f} | F1: {test_metrics['f1_score']:.4f}")
+    with open(log_file_path, "a", encoding="utf-8") as lf:
+        lf.write("\n" + "\n".join(log_lines) + "\n")
 
     return test_metrics, test_probs
 

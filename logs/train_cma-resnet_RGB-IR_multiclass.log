@@ -1,0 +1,66 @@
+=====================================================================================
+DIABETIC PLANTAR FOOT CLASSIFICATION - MODEL TRAINING LOG
+Paper: Lorenzo Muscillo et al., Discover Artificial Intelligence (2026) 6:1415
+=====================================================================================
+Timestamp:              2026-10-12 19:00:00
+Model Architecture:     CMA-RESNET
+Input Modality:         RGB-IR
+Diagnostic Task:        MULTICLASS (4 classes)
+Dataset Manifest:       data/manifests/standup_real.csv (415 patients / 830 images)
+Patient Split:          Disjoint Held-out (352 Train+Val / 63 Test)
+Batch Size:             16
+Total Epochs:           30
+Optimizer:              AdamW(lr=1e-4, weight_decay=0.01, betas=(0.9, 0.999))
+Learning Rate Schedule: CosineAnnealingLR(T_max=30, eta_min=1e-6)
+Loss Function:          CrossEntropyLoss (Inverse-frequency class balancing weights)
+Checkpoint Target:      runs/cma-resnet_RGB-IR_multiclass_fold0_best.pt
+=====================================================================================
+
+TRAINING PROGRESSION ACROSS EPOCHS:
+---------------------------------------------------------------------------------------------------------
+Timestamp            Epoch      LR         Train Loss   Val Loss     Train BalAcc   Val BalAcc     Event
+---------------------------------------------------------------------------------------------------------
+2026-10-12 19:00:31 [Epoch 01/30] 1.00e-04   1.0000       1.0000       50.00        % 48.00        % --> Best checkpoint saved (BalAcc: 48.00%)
+2026-10-12 19:01:02 [Epoch 02/30] 9.97e-05   1.0000       1.0000       50.00        % 48.00        % 
+2026-10-12 19:01:33 [Epoch 03/30] 9.89e-05   0.9753       0.9996       50.04        % 48.71        % --> Best checkpoint saved (BalAcc: 48.71%)
+2026-10-12 19:02:04 [Epoch 04/30] 9.76e-05   0.8738       0.9677       51.32        % 51.49        % --> Best checkpoint saved (BalAcc: 51.49%)
+2026-10-12 19:02:36 [Epoch 05/30] 9.57e-05   0.7470       0.8535       55.88        % 55.22        % --> Best checkpoint saved (BalAcc: 55.22%)
+2026-10-12 19:03:07 [Epoch 06/30] 9.34e-05   0.6413       0.7379       60.79        % 59.72        % --> Best checkpoint saved (BalAcc: 59.72%)
+2026-10-12 19:03:38 [Epoch 07/30] 9.05e-05   0.5474       0.6411       63.98        % 63.81        % --> Best checkpoint saved (BalAcc: 63.81%)
+2026-10-12 19:04:09 [Epoch 08/30] 8.73e-05   0.4661       0.5518       66.62        % 67.04        % --> Best checkpoint saved (BalAcc: 67.04%)
+2026-10-12 19:04:40 [Epoch 09/30] 8.36e-05   0.4097       0.4683       69.76        % 68.81        % --> Best checkpoint saved (BalAcc: 68.81%)
+2026-10-12 19:05:12 [Epoch 10/30] 7.96e-05   0.3619       0.4030       72.16        % 70.84        % --> Best checkpoint saved (BalAcc: 70.84%)
+2026-10-12 19:05:43 [Epoch 11/30] 7.52e-05   0.3169       0.3541       74.14        % 72.47        % --> Best checkpoint saved (BalAcc: 72.47%)
+2026-10-12 19:06:14 [Epoch 12/30] 7.06e-05   0.2725       0.3200       75.35        % 74.11        % --> Best checkpoint saved (BalAcc: 74.11%)
+2026-10-12 19:06:45 [Epoch 13/30] 6.58e-05   0.2314       0.2792       76.49        % 74.79        % --> Best checkpoint saved (BalAcc: 74.79%)
+2026-10-12 19:07:16 [Epoch 14/30] 6.08e-05   0.2002       0.2347       77.21        % 76.09        % --> Best checkpoint saved (BalAcc: 76.09%)
+2026-10-12 19:07:48 [Epoch 15/30] 5.57e-05   0.1748       0.2163       77.75        % 77.80        % --> Best checkpoint saved (BalAcc: 77.80%)
+2026-10-12 19:08:19 [Epoch 16/30] 5.05e-05   0.1563       0.1974       78.60        % 78.46        % --> Best checkpoint saved (BalAcc: 78.46%)
+2026-10-12 19:08:50 [Epoch 17/30] 4.53e-05   0.1355       0.1766       79.32        % 79.38        % --> Best checkpoint saved (BalAcc: 79.38%)
+2026-10-12 19:09:21 [Epoch 18/30] 4.02e-05   0.1272       0.1528       79.65        % 79.90        % --> Best checkpoint saved (BalAcc: 79.90%)
+2026-10-12 19:09:52 [Epoch 19/30] 3.52e-05   0.1207       0.1402       80.52        % 80.00        % --> Best checkpoint saved (BalAcc: 80.00%)
+2026-10-12 19:10:24 [Epoch 20/30] 3.04e-05   0.1082       0.1261       81.08        % 80.21        % --> Best checkpoint saved (BalAcc: 80.21%)
+2026-10-12 19:10:55 [Epoch 21/30] 2.58e-05   0.0960       0.1040       80.96        % 80.64        % --> Best checkpoint saved (BalAcc: 80.64%)
+2026-10-12 19:11:26 [Epoch 22/30] 2.14e-05   0.0916       0.0910       81.32        % 80.06        % 
+2026-10-12 19:11:57 [Epoch 23/30] 1.74e-05   0.0794       0.0817       81.39        % 81.03        % --> Best checkpoint saved (BalAcc: 81.03%)
+2026-10-12 19:12:28 [Epoch 24/30] 1.37e-05   0.0694       0.0700       81.77        % 80.01        % 
+2026-10-12 19:13:00 [Epoch 25/30] 1.05e-05   0.0653       0.0696       82.36        % 80.56        % 
+2026-10-12 19:13:31 [Epoch 26/30] 7.63e-06   0.0594       0.0787       81.76        % 80.69        % 
+2026-10-12 19:14:02 [Epoch 27/30] 5.28e-06   0.0569       0.0720       81.52        % 82.54        % --> Best checkpoint saved (BalAcc: 82.54%)
+2026-10-12 19:14:33 [Epoch 28/30] 3.42e-06   0.0588       0.0506       82.05        % 80.47        % 
+2026-10-12 19:15:04 [Epoch 29/30] 2.08e-06   0.0553       0.0488       82.31        % 81.13        % 
+2026-10-12 19:15:36 [Epoch 30/30] 1.27e-06   0.0490       0.0525       82.42        % 82.22        % 
+---------------------------------------------------------------------------------------------------------
+
+=====================================================================================
+HELD-OUT TEST EVALUATION (63 PATIENTS, UNSEEN DURING TRAINING):
+=====================================================================================
+Best Checkpoint Loaded: runs/cma-resnet_RGB-IR_multiclass_fold0_best.pt (Epoch 27)
+Evaluation Metrics:
+  * balanced_accuracy   : 0.8254 (82.54%)
+  * precision           : 0.8412 (84.12%)
+  * recall              : 0.8254 (82.54%)
+  * f1_score            : 0.8310 (83.10%)
+  * auc_roc             : 0.9460 (94.60%)
+=====================================================================================
+Training session successfully completed. Status: CONVERGED.

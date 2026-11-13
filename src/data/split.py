@@ -1,89 +1,69 @@
-"""Patient-Level Disjoint Dataset Partitioning
-Paper: Muscillo et al. (Discover Artificial Intelligence, 2026) Section 2.6.3
-Ensures zero data leakage across training, validation, and held-out test sets.
+"""Patient-Level Disjoint Data Splitting Utility
+Paper: Muscillo et al. (Discover Artificial Intelligence, 2026) Section 2.6.2
+Ensures strict patient-level separation across held-out test set (15%) and 5-fold CV.
 """
 
 import json
 from pathlib import Path
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import StratifiedGroupKFold, StratifiedShuffleSplit
-from src.config import RANDOM_SEED, HELD_OUT_TEST_RATIO, N_SPLITS_CV, SPLITS_DIR
+
+from src.config import SPLITS_DIR, RANDOM_SEED
 
 
 def create_patient_level_splits(
     df: pd.DataFrame,
-    patient_col: str = "patient_id",
-    label_col: str = "label",
-    stratify_col: str = "clinical_stage",
-    test_size: float = HELD_OUT_TEST_RATIO,
-    n_splits_cv: int = N_SPLITS_CV,
-    random_state: int = RANDOM_SEED,
-    output_dir: Path = SPLITS_DIR,
+    n_splits: int = 5,
+    test_size: float = 0.15,
+    seed: int = RANDOM_SEED,
+    output_path: Path = SPLITS_DIR / "patient_splits.json",
 ) -> dict:
-    """Perform strict patient-level partition:
-    1. 15% fixed held-out test set based on unique patients, stratified by class.
-    2. Remaining 85% partitioned into stratified 5-fold cross-validation (70% train / 15% val).
-    3. Programmatically verifies 0 intersection between patient ID sets.
-    """
-    # Group by patient to get patient-level label for stratification
-    strat_key = stratify_col if stratify_col in df.columns else label_col
-    patient_df = (
-        df.groupby(patient_col)
-        .agg({strat_key: "first", label_col: "first"})
-        .reset_index()
-    )
-    
-    unique_patients = patient_df[patient_col].values
-    patient_strat_labels = patient_df[strat_key].values
+    """Create stratified patient-level held-out test split and k-fold cross-validation splits."""
+    rng = np.random.default_rng(seed)
+    patient_df = df.groupby("patient_id").first().reset_index()
 
-    # Stratified split for test set
-    sss = StratifiedShuffleSplit(n_splits=1, test_size=test_size, random_state=random_state)
-    dev_idx, test_idx = next(sss.split(unique_patients, patient_strat_labels))
-    
-    test_patients = set(unique_patients[test_idx])
-    dev_patients = unique_patients[dev_idx]
-    dev_labels = patient_strat_labels[dev_idx]
-    
-    # 5-fold stratified cross validation on dev patients
-    sgkf = StratifiedGroupKFold(n_splits=n_splits_cv, shuffle=True, random_state=random_state)
+    strat_col = "multiclass_label" if "multiclass_label" in patient_df.columns else "label"
+    test_patients = []
+    train_val_patients = []
+
+    for cls_val, group in patient_df.groupby(strat_col):
+        pids = group["patient_id"].values.copy()
+        rng.shuffle(pids)
+        n_test = max(1, int(round(len(pids) * test_size)))
+        test_patients.extend(pids[:n_test].tolist())
+        train_val_patients.extend(pids[n_test:].tolist())
+
+    tv_df = patient_df[patient_df["patient_id"].isin(train_val_patients)].reset_index(drop=True)
+    fold_buckets = [[] for _ in range(n_splits)]
+    for cls_val, group in tv_df.groupby(strat_col):
+        pids = group["patient_id"].values.copy()
+        rng.shuffle(pids)
+        for idx, pid in enumerate(pids):
+            fold_buckets[idx % n_splits].append(pid)
+
     folds = []
-    
-    for fold_idx, (train_sub_idx, val_sub_idx) in enumerate(
-        sgkf.split(dev_patients, dev_labels, groups=dev_patients)
-    ):
-        fold_train_patients = set(dev_patients[train_sub_idx])
-        fold_val_patients = set(dev_patients[val_sub_idx])
-        
-        # Verify disjointness
-        assert len(fold_train_patients.intersection(fold_val_patients)) == 0, "Train-val overlap detected!"
-        assert len(fold_train_patients.intersection(test_patients)) == 0, "Train-test overlap detected!"
-        assert len(fold_val_patients.intersection(test_patients)) == 0, "Val-test overlap detected!"
-        
+    for f_idx in range(n_splits):
+        val_p = fold_buckets[f_idx]
+        train_p = [p for i, b in enumerate(fold_buckets) if i != f_idx for p in b]
         folds.append({
-            "fold": fold_idx,
-            "train_patients": sorted(list(fold_train_patients)),
-            "val_patients": sorted(list(fold_val_patients)),
+            "fold": f_idx,
+            "train_patients": train_p,
+            "val_patients": val_p,
         })
-        
-    split_info = {
-        "random_seed": random_state,
-        "total_patients": len(unique_patients),
-        "test_patients": sorted(list(test_patients)),
-        "dev_patients": sorted(list(dev_patients)),
+
+    splits_data = {
+        "seed": seed,
+        "test_patients": test_patients,
         "folds": folds,
     }
-    
-    # Save splits to JSON
-    output_dir.mkdir(parents=True, exist_ok=True)
-    out_file = output_dir / "patient_splits.json"
-    with open(out_file, "w") as f:
-        json.dump(split_info, f, indent=2)
-        
-    return split_info
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(splits_data, f, indent=2)
+    return splits_data
 
 
-def load_patient_splits(split_file: Path = SPLITS_DIR / "patient_splits.json") -> dict:
-    """Load precomputed patient-level splits."""
-    with open(split_file, "r") as f:
+def load_patient_splits(splits_path: Path = SPLITS_DIR / "patient_splits.json") -> dict:
+    """Load saved patient-level splits JSON."""
+    with open(splits_path, "r", encoding="utf-8") as f:
         return json.load(f)
+

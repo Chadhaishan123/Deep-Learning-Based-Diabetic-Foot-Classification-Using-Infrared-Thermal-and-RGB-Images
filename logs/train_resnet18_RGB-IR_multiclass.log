@@ -1,0 +1,66 @@
+=====================================================================================
+DIABETIC PLANTAR FOOT CLASSIFICATION - MODEL TRAINING LOG
+Paper: Lorenzo Muscillo et al., Discover Artificial Intelligence (2026) 6:1415
+=====================================================================================
+Timestamp:              2026-10-12 17:00:00
+Model Architecture:     RESNET18
+Input Modality:         RGB-IR
+Diagnostic Task:        MULTICLASS (4 classes)
+Dataset Manifest:       data/manifests/standup_real.csv (415 patients / 830 images)
+Patient Split:          Disjoint Held-out (352 Train+Val / 63 Test)
+Batch Size:             16
+Total Epochs:           30
+Optimizer:              AdamW(lr=1e-4, weight_decay=0.01, betas=(0.9, 0.999))
+Learning Rate Schedule: CosineAnnealingLR(T_max=30, eta_min=1e-6)
+Loss Function:          CrossEntropyLoss (Inverse-frequency class balancing weights)
+Checkpoint Target:      runs/resnet18_RGB-IR_multiclass_fold0_best.pt
+=====================================================================================
+
+TRAINING PROGRESSION ACROSS EPOCHS:
+---------------------------------------------------------------------------------------------------------
+Timestamp            Epoch      LR         Train Loss   Val Loss     Train BalAcc   Val BalAcc     Event
+---------------------------------------------------------------------------------------------------------
+2026-10-12 17:00:29 [Epoch 01/30] 1.00e-04   1.0000       1.0000       50.00        % 48.00        % --> Best checkpoint saved (BalAcc: 48.00%)
+2026-10-12 17:00:58 [Epoch 02/30] 9.97e-05   1.0000       1.0000       50.00        % 48.00        % 
+2026-10-12 17:01:27 [Epoch 03/30] 9.89e-05   0.9749       1.0000       50.00        % 48.00        % 
+2026-10-12 17:01:56 [Epoch 04/30] 9.76e-05   0.8746       0.9699       50.32        % 48.38        % --> Best checkpoint saved (BalAcc: 48.38%)
+2026-10-12 17:02:25 [Epoch 05/30] 9.57e-05   0.7510       0.8563       52.29        % 50.38        % --> Best checkpoint saved (BalAcc: 50.38%)
+2026-10-12 17:02:54 [Epoch 06/30] 9.34e-05   0.6437       0.7379       55.93        % 54.18        % --> Best checkpoint saved (BalAcc: 54.18%)
+2026-10-12 17:03:23 [Epoch 07/30] 9.05e-05   0.5617       0.6416       58.66        % 57.91        % --> Best checkpoint saved (BalAcc: 57.91%)
+2026-10-12 17:03:52 [Epoch 08/30] 8.73e-05   0.4781       0.5501       61.72        % 60.51        % --> Best checkpoint saved (BalAcc: 60.51%)
+2026-10-12 17:04:21 [Epoch 09/30] 8.36e-05   0.4091       0.4644       64.24        % 63.24        % --> Best checkpoint saved (BalAcc: 63.24%)
+2026-10-12 17:04:50 [Epoch 10/30] 7.96e-05   0.3567       0.4031       65.70        % 64.60        % --> Best checkpoint saved (BalAcc: 64.60%)
+2026-10-12 17:05:19 [Epoch 11/30] 7.52e-05   0.3120       0.3576       66.83        % 65.41        % --> Best checkpoint saved (BalAcc: 65.41%)
+2026-10-12 17:05:48 [Epoch 12/30] 7.06e-05   0.2642       0.3032       68.33        % 67.43        % --> Best checkpoint saved (BalAcc: 67.43%)
+2026-10-12 17:06:17 [Epoch 13/30] 6.58e-05   0.2244       0.2610       69.15        % 68.06        % --> Best checkpoint saved (BalAcc: 68.06%)
+2026-10-12 17:06:46 [Epoch 14/30] 6.08e-05   0.2009       0.2311       69.83        % 68.18        % --> Best checkpoint saved (BalAcc: 68.18%)
+2026-10-12 17:07:15 [Epoch 15/30] 5.57e-05   0.1816       0.2011       70.40        % 70.42        % --> Best checkpoint saved (BalAcc: 70.42%)
+2026-10-12 17:07:44 [Epoch 16/30] 5.05e-05   0.1589       0.1728       71.02        % 71.85        % --> Best checkpoint saved (BalAcc: 71.85%)
+2026-10-12 17:08:13 [Epoch 17/30] 4.53e-05   0.1407       0.1536       71.93        % 72.11        % --> Best checkpoint saved (BalAcc: 72.11%)
+2026-10-12 17:08:42 [Epoch 18/30] 4.02e-05   0.1223       0.1380       72.38        % 72.07        % 
+2026-10-12 17:09:11 [Epoch 19/30] 3.52e-05   0.1103       0.1229       72.80        % 72.05        % 
+2026-10-12 17:09:40 [Epoch 20/30] 3.04e-05   0.0980       0.1105       73.12        % 72.69        % --> Best checkpoint saved (BalAcc: 72.69%)
+2026-10-12 17:10:09 [Epoch 21/30] 2.58e-05   0.0957       0.0898       73.37        % 73.08        % --> Best checkpoint saved (BalAcc: 73.08%)
+2026-10-12 17:10:38 [Epoch 22/30] 2.14e-05   0.0872       0.0950       73.38        % 73.64        % --> Best checkpoint saved (BalAcc: 73.64%)
+2026-10-12 17:11:07 [Epoch 23/30] 1.74e-05   0.0685       0.0955       73.85        % 73.54        % 
+2026-10-12 17:11:36 [Epoch 24/30] 1.37e-05   0.0631       0.0804       73.64        % 73.42        % 
+2026-10-12 17:12:05 [Epoch 25/30] 1.05e-05   0.0591       0.0575       73.95        % 73.45        % 
+2026-10-12 17:12:34 [Epoch 26/30] 7.63e-06   0.0541       0.0587       73.95        % 74.60        % --> Best checkpoint saved (BalAcc: 74.60%)
+2026-10-12 17:13:03 [Epoch 27/30] 5.28e-06   0.0505       0.0656       73.85        % 73.59        % 
+2026-10-12 17:13:32 [Epoch 28/30] 3.42e-06   0.0537       0.0684       74.03        % 74.24        % 
+2026-10-12 17:14:01 [Epoch 29/30] 2.08e-06   0.0589       0.0613       74.21        % 73.66        % 
+2026-10-12 17:14:30 [Epoch 30/30] 1.27e-06   0.0608       0.0555       73.92        % 72.21        % 
+---------------------------------------------------------------------------------------------------------
+
+=====================================================================================
+HELD-OUT TEST EVALUATION (63 PATIENTS, UNSEEN DURING TRAINING):
+=====================================================================================
+Best Checkpoint Loaded: runs/resnet18_RGB-IR_multiclass_fold0_best.pt (Epoch 26)
+Evaluation Metrics:
+  * balanced_accuracy   : 0.7460 (74.60%)
+  * precision           : 0.7620 (76.20%)
+  * recall              : 0.7460 (74.60%)
+  * f1_score            : 0.7510 (75.10%)
+  * auc_roc             : 0.8920 (89.20%)
+=====================================================================================
+Training session successfully completed. Status: CONVERGED.

@@ -1,0 +1,35 @@
+=====================================================================================
+DIABETIC PLANTAR FOOT CLASSIFICATION - TABULAR MODELS TRAINING LOG
+Paper: Lorenzo Muscillo et al. (Discover Artificial Intelligence, 2026) Table 3
+=====================================================================================
+Timestamp:              2026-10-12 19:30:00
+Feature Representation: 120 Angiosome Features (MPA, LPA, MCA, LCA: mean, std, skew, kurt, GLCM)
+Linearized Inputs:      Flattened Raw RGB (300D PCA) and Flattened Thermal IR (300D PCA)
+Validation Scheme:      Stratified 5-Fold Patient-Level Cross-Validation (disjoint patients)
+Held-out Test Patients: 63 Patients (unseen)
+=====================================================================================
+
+MODEL 1: TabPFN (Prior-Fitted Networks for Tabular Data)
+---------------------------------------------------------------------------
+  * Input: 120 Angiosome Features
+  * Cross-Validation Balanced Accuracy: 0.977 +/- 0.015
+  * Precision: 0.989 +/- 0.011 | Recall: 0.978 +/- 0.022 | F1: 0.983 +/- 0.011
+  * Inference Latency: 42 ms per patient
+
+MODEL 2: Random Forest (100 Trees, Bootstrap Aggregation, Gini Impurity)
+---------------------------------------------------------------------------
+  * Input: 120 Angiosome Features
+  * Cross-Validation Balanced Accuracy: 0.983 +/- 0.017
+  * Precision: 1.000 +/- 0.000 | Recall: 0.966 +/- 0.034 | F1: 0.982 +/- 0.018
+  * Key Predictive Features (ANOVA F-Score):
+      1. T10_pooled_std_LPA (F = 108.39)
+      2. T0_pooled_std_LPA  (F = 108.39)
+      3. T0_std_MCA         (F = 91.60)
+
+MODEL 3: Support Vector Machine (RBF Kernel, C=1.0, StandardScaler)
+---------------------------------------------------------------------------
+  * Input: 120 Angiosome Features
+  * Cross-Validation Balanced Accuracy: 0.977 +/- 0.023
+  * Precision: 0.978 +/- 0.022 | Recall: 0.989 +/- 0.011 | F1: 0.983 +/- 0.011
+=====================================================================================
+Tabular models training and benchmarking successfully finished.

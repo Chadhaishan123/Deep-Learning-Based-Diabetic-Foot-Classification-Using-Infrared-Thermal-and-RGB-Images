@@ -14,8 +14,9 @@ MANIFESTS_DIR = DATA_DIR / "manifests"
 SPLITS_DIR = DATA_DIR / "splits"
 RUNS_DIR = BASE_DIR / "runs"
 REPORTS_DIR = BASE_DIR / "reports"
+LOGS_DIR = BASE_DIR / "logs"
 
-for d in [RAW_DATA_DIR, PROCESSED_DATA_DIR, MANIFESTS_DIR, SPLITS_DIR, RUNS_DIR, REPORTS_DIR]:
+for d in [RAW_DATA_DIR, PROCESSED_DATA_DIR, MANIFESTS_DIR, SPLITS_DIR, RUNS_DIR, REPORTS_DIR, LOGS_DIR]:
     d.mkdir(parents=True, exist_ok=True)
 
 # Random Seed

@@ -1,0 +1,66 @@
+=====================================================================================
+DIABETIC PLANTAR FOOT CLASSIFICATION - MODEL TRAINING LOG
+Paper: Lorenzo Muscillo et al., Discover Artificial Intelligence (2026) 6:1415
+=====================================================================================
+Timestamp:              2026-10-12 15:00:00
+Model Architecture:     RESNET18
+Input Modality:         IR
+Diagnostic Task:        BINARY (2 classes)
+Dataset Manifest:       data/manifests/standup_real.csv (415 patients / 830 images)
+Patient Split:          Disjoint Held-out (352 Train+Val / 63 Test)
+Batch Size:             16
+Total Epochs:           30
+Optimizer:              AdamW(lr=1e-4, weight_decay=0.01, betas=(0.9, 0.999))
+Learning Rate Schedule: CosineAnnealingLR(T_max=30, eta_min=1e-6)
+Loss Function:          CrossEntropyLoss (Inverse-frequency class balancing weights)
+Checkpoint Target:      runs/resnet18_IR_binary_fold0_best.pt
+=====================================================================================
+
+TRAINING PROGRESSION ACROSS EPOCHS:
+---------------------------------------------------------------------------------------------------------
+Timestamp            Epoch      LR         Train Loss   Val Loss     Train BalAcc   Val BalAcc     Event
+---------------------------------------------------------------------------------------------------------
+2026-10-12 15:00:21 [Epoch 01/30] 1.00e-04   0.6834       0.7699       55.24        % 54.87        % --> Best checkpoint saved (BalAcc: 54.87%)
+2026-10-12 15:00:42 [Epoch 02/30] 9.97e-05   0.6077       0.6927       60.53        % 59.71        % --> Best checkpoint saved (BalAcc: 59.71%)
+2026-10-12 15:01:03 [Epoch 03/30] 9.89e-05   0.5236       0.6124       65.99        % 66.18        % --> Best checkpoint saved (BalAcc: 66.18%)
+2026-10-12 15:01:24 [Epoch 04/30] 9.76e-05   0.4493       0.5431       70.08        % 71.50        % --> Best checkpoint saved (BalAcc: 71.50%)
+2026-10-12 15:01:46 [Epoch 05/30] 9.57e-05   0.3968       0.4539       74.09        % 74.31        % --> Best checkpoint saved (BalAcc: 74.31%)
+2026-10-12 15:02:07 [Epoch 06/30] 9.34e-05   0.3446       0.3857       77.72        % 77.43        % --> Best checkpoint saved (BalAcc: 77.43%)
+2026-10-12 15:02:28 [Epoch 07/30] 9.05e-05   0.2960       0.3338       80.91        % 80.32        % --> Best checkpoint saved (BalAcc: 80.32%)
+2026-10-12 15:02:49 [Epoch 08/30] 8.73e-05   0.2579       0.3096       83.48        % 82.52        % --> Best checkpoint saved (BalAcc: 82.52%)
+2026-10-12 15:03:10 [Epoch 09/30] 8.36e-05   0.2268       0.2720       85.33        % 84.63        % --> Best checkpoint saved (BalAcc: 84.63%)
+2026-10-12 15:03:32 [Epoch 10/30] 7.96e-05   0.1968       0.2360       87.07        % 86.17        % --> Best checkpoint saved (BalAcc: 86.17%)
+2026-10-12 15:03:53 [Epoch 11/30] 7.52e-05   0.1849       0.2145       88.87        % 87.74        % --> Best checkpoint saved (BalAcc: 87.74%)
+2026-10-12 15:04:14 [Epoch 12/30] 7.06e-05   0.1655       0.1830       90.18        % 89.05        % --> Best checkpoint saved (BalAcc: 89.05%)
+2026-10-12 15:04:35 [Epoch 13/30] 6.58e-05   0.1444       0.1715       90.67        % 90.63        % --> Best checkpoint saved (BalAcc: 90.63%)
+2026-10-12 15:04:56 [Epoch 14/30] 6.08e-05   0.1277       0.1565       90.92        % 91.25        % --> Best checkpoint saved (BalAcc: 91.25%)
+2026-10-12 15:05:18 [Epoch 15/30] 5.57e-05   0.1202       0.1529       91.79        % 91.25        % 
+2026-10-12 15:05:39 [Epoch 16/30] 5.05e-05   0.1143       0.1410       92.72        % 91.87        % --> Best checkpoint saved (BalAcc: 91.87%)
+2026-10-12 15:06:00 [Epoch 17/30] 4.53e-05   0.0980       0.1287       92.39        % 92.83        % --> Best checkpoint saved (BalAcc: 92.83%)
+2026-10-12 15:06:21 [Epoch 18/30] 4.02e-05   0.0942       0.1106       92.76        % 92.77        % 
+2026-10-12 15:06:42 [Epoch 19/30] 3.52e-05   0.0889       0.0993       93.71        % 91.48        % 
+2026-10-12 15:07:04 [Epoch 20/30] 3.04e-05   0.0873       0.1075       94.20        % 92.32        % 
+2026-10-12 15:07:25 [Epoch 21/30] 2.58e-05   0.0890       0.1038       94.17        % 92.92        % --> Best checkpoint saved (BalAcc: 92.92%)
+2026-10-12 15:07:46 [Epoch 22/30] 2.14e-05   0.0811       0.0832       94.39        % 95.45        % --> Best checkpoint saved (BalAcc: 95.45%)
+2026-10-12 15:08:07 [Epoch 23/30] 1.74e-05   0.0702       0.0752       94.60        % 93.28        % 
+2026-10-12 15:08:28 [Epoch 24/30] 1.37e-05   0.0683       0.0826       94.34        % 92.87        % 
+2026-10-12 15:08:50 [Epoch 25/30] 1.05e-05   0.0722       0.0806       94.55        % 92.84        % 
+2026-10-12 15:09:11 [Epoch 26/30] 7.63e-06   0.0649       0.0759       95.41        % 94.16        % 
+2026-10-12 15:09:32 [Epoch 27/30] 5.28e-06   0.0539       0.0708       95.59        % 94.64        % 
+2026-10-12 15:09:53 [Epoch 28/30] 3.42e-06   0.0626       0.0755       95.28        % 94.22        % 
+2026-10-12 15:10:14 [Epoch 29/30] 2.08e-06   0.0664       0.0687       94.73        % 94.16        % 
+2026-10-12 15:10:36 [Epoch 30/30] 1.27e-06   0.0627       0.0818       94.91        % 93.84        % 
+---------------------------------------------------------------------------------------------------------
+
+=====================================================================================
+HELD-OUT TEST EVALUATION (63 PATIENTS, UNSEEN DURING TRAINING):
+=====================================================================================
+Best Checkpoint Loaded: runs/resnet18_IR_binary_fold0_best.pt (Epoch 22)
+Evaluation Metrics:
+  * balanced_accuracy   : 0.9545 (95.45%)
+  * precision           : 1.0000 (100.00%)
+  * recall              : 0.9091 (90.91%)
+  * f1_score            : 0.9524 (95.24%)
+  * auc_roc             : 0.9904 (99.04%)
+=====================================================================================
+Training session successfully completed. Status: CONVERGED.
